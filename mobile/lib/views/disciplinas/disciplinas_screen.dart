@@ -40,6 +40,7 @@ class DisciplinasScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Disciplinas')),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'novaDisciplinaFab',
         key: const Key('novaDisciplinaButton'),
         onPressed: () => _abrirFormulario(context),
         icon: const Icon(Icons.add_rounded),

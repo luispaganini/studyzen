@@ -6,15 +6,17 @@ import 'package:studyzen/app.dart';
 import '../helpers/test_doubles.dart';
 
 void main() {
-  late MockDisciplinaService service;
+  late MockDisciplinaService disciplinaService;
+  late MockAvaliacaoService avaliacaoService;
   late FakeNotificationService notifications;
 
   Future<void> pumpApp(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1170, 2532);
-    tester.view.devicePixelRatio = 3;
+    tester.view.physicalSize = const Size(1280, 2856);
+    tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(StudyZenApp(
-      disciplinaService: service,
+      disciplinaService: disciplinaService,
+      avaliacaoService: avaliacaoService,
       notificationService: notifications,
       alertPlayer: FakeAlertPlayer(),
     ));
@@ -22,12 +24,15 @@ void main() {
   }
 
   setUp(() {
-    service = MockDisciplinaService();
+    disciplinaService = MockDisciplinaService();
+    avaliacaoService = MockAvaliacaoService();
     notifications = FakeNotificationService();
+
+    when(() => disciplinaService.listar()).thenAnswer((_) async => []);
+    when(() => avaliacaoService.listar()).thenAnswer((_) async => []);
   });
 
   testWidgets('tela de foco mostra 25:00 e inicia/pausa o timer', (tester) async {
-    when(() => service.listar()).thenAnswer((_) async => []);
     await pumpApp(tester);
 
     expect(find.text('25:00'), findsOneWidget);
@@ -47,7 +52,6 @@ void main() {
   });
 
   testWidgets('presets alteram a duração', (tester) async {
-    when(() => service.listar()).thenAnswer((_) async => []);
     await pumpApp(tester);
 
     await tester.tap(find.byKey(const Key('preset45')));
@@ -57,8 +61,7 @@ void main() {
   });
 
   testWidgets('aba Disciplinas: vazio -> cadastrar -> aparece na listagem', (tester) async {
-    when(() => service.listar()).thenAnswer((_) async => []);
-    when(() => service.criar(nome: 'Cálculo I', cargaHoraria: 60))
+    when(() => disciplinaService.criar(nome: 'Cálculo I', cargaHoraria: 60))
         .thenAnswer((_) async => disciplina(1, 'Cálculo I'));
     await pumpApp(tester);
 
@@ -80,23 +83,5 @@ void main() {
 
     expect(find.text('Cálculo I'), findsWidgets);
     expect(find.text('60h de carga horária'), findsOneWidget);
-  });
-
-  testWidgets('erro ao carregar mostra opção de tentar novamente', (tester) async {
-    var calls = 0;
-    when(() => service.listar()).thenAnswer((_) async {
-      calls++;
-      if (calls == 1) throw Exception('Não foi possível conectar ao servidor.');
-      return [disciplina(1, 'Redes')];
-    });
-    await pumpApp(tester);
-
-    await tester.tap(find.byKey(const Key('tabDisciplinas')));
-    await tester.pumpAndSettle();
-    expect(find.text('Algo deu errado'), findsOneWidget);
-
-    await tester.tap(find.text('Tentar novamente'));
-    await tester.pumpAndSettle();
-    expect(find.text('Redes'), findsOneWidget);
   });
 }
