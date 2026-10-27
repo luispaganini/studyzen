@@ -6,7 +6,9 @@ import '../../models/avaliacao.dart';
 import '../../services/avaliacao_service.dart';
 import '../../viewmodels/avaliacao_form_viewmodel.dart';
 import '../../viewmodels/avaliacoes_viewmodel.dart';
+import '../../viewmodels/humor_viewmodel.dart';
 import '../disciplinas/components/status_message.dart';
+import '../humor/components/humor_scale_selector.dart';
 import 'avaliacao_form_screen.dart';
 import 'components/avaliacao_tile.dart';
 
@@ -35,9 +37,10 @@ class PrazosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<AvaliacoesViewModel>();
+    final humorVm = context.watch<HumorViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Prazos e Entregas')),
+      appBar: AppBar(title: const Text('Prazos e Bem-estar')),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'novoPrazoFab',
         key: const Key('novoPrazoButton'),
@@ -46,10 +49,29 @@ class PrazosScreen extends StatelessWidget {
         label: const Text('Novo prazo'),
       ),
       body: RefreshIndicator(
-        onRefresh: vm.carregar,
+        onRefresh: () async {
+          await vm.carregar();
+          await humorVm.carregar();
+        },
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
           children: [
+            // US07: Checagem Rápida de Humor
+            HumorScaleSelector(
+              onSelect: (nivel, emoji, sentimento) async {
+                final ok = await humorVm.registrarHumor(
+                  nivel: nivel,
+                  emoji: emoji,
+                  sentimento: sentimento,
+                );
+                if (ok && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Humor $emoji ($sentimento) registrado com sucesso!')),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 20),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Text(

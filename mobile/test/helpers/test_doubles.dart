@@ -1,12 +1,15 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:studyzen/models/avaliacao.dart';
 import 'package:studyzen/models/disciplina.dart';
+import 'package:studyzen/models/humor.dart';
 import 'package:studyzen/services/avaliacao_service.dart';
 import 'package:studyzen/services/disciplina_service.dart';
+import 'package:studyzen/services/humor_service.dart';
 import 'package:studyzen/services/notification_service.dart';
 
 class MockDisciplinaService extends Mock implements DisciplinaService {}
 class MockAvaliacaoService extends Mock implements AvaliacaoService {}
+class MockHumorService extends Mock implements HumorService {}
 
 class FakeNotificationService implements NotificationService {
   final List<DateTime> scheduled = [];
@@ -64,4 +67,13 @@ Avaliacao avaliacao(int id, String titulo, {int discId = 1, String discNome = 'C
         Subtarefa(titulo: 'Rascunho', concluida: false),
         Subtarefa(titulo: 'Revisão', concluida: false),
       ],
+    );
+
+RegistroHumor humor(int id, int nivel, {String emoji = '🙂', String sentimento = 'Produtivo'}) =>
+    RegistroHumor(
+      id: id,
+      nivel: nivel,
+      emoji: emoji,
+      sentimento: sentimento,
+      dataRegistro: DateTime.utc(2026, 10, 12),
     );

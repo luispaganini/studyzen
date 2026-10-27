@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:studyzen/core/view_state.dart';
 import 'package:studyzen/viewmodels/avaliacao_form_viewmodel.dart';
 import 'package:studyzen/viewmodels/avaliacoes_viewmodel.dart';
+import 'package:studyzen/viewmodels/humor_viewmodel.dart';
 
 import '../helpers/test_doubles.dart';
 
@@ -71,4 +72,26 @@ void main() {
       expect(vm.errorMessage, contains('disciplina'));
     });
   });
+
+  group('HumorViewModel', () {
+    late MockHumorService service;
+    late HumorViewModel vm;
+
+    setUp(() {
+      service = MockHumorService();
+      vm = HumorViewModel(service);
+    });
+
+    test('registrarHumor salva imediatamente e atualiza histórico', () async {
+      when(() => service.registrar(nivel: 5, emoji: '😄', sentimento: 'Excelente'))
+          .thenAnswer((_) async => humor(1, 5, emoji: '😄', sentimento: 'Excelente'));
+
+      final ok = await vm.registrarHumor(nivel: 5, emoji: '😄', sentimento: 'Excelente');
+
+      expect(ok, isTrue);
+      expect(vm.ultimoRegistro?.nivel, 5);
+      expect(vm.historico, hasLength(1));
+    });
+  });
 }
+
