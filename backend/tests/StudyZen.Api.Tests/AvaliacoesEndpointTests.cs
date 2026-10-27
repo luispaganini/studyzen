@@ -62,4 +62,15 @@ public class AvaliacoesEndpointTests : IClassFixture<StudyZenApiFactory>
         var indexDistante = lista.FindIndex(a => a.Titulo == "Entrega Final");
         Assert.True(indexProxima < indexDistante, "A avaliação mais próxima deve vir antes na listagem.");
     }
+
+    [Fact]
+    public async Task Decompor_TrabalhoDeConclusao_RetornaTresEtapasPadrao()
+    {
+        var response = await _client.GetFromJsonAsync<DecomposicaoResponse>("/api/avaliacoes/decompor?tipo=Trabalho de Conclusão");
+        Assert.NotNull(response);
+        Assert.Equal(3, response.SubtarefasSugeridas.Count);
+        Assert.Contains("Pesquisa", response.SubtarefasSugeridas);
+        Assert.Contains("Rascunho", response.SubtarefasSugeridas);
+        Assert.Contains("Revisão", response.SubtarefasSugeridas);
+    }
 }
