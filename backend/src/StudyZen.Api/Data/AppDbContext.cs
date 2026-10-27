@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Disciplina> Disciplinas => Set<Disciplina>();
     public DbSet<Avaliacao> Avaliacoes => Set<Avaliacao>();
     public DbSet<Subtarefa> Subtarefas => Set<Subtarefa>();
+    public DbSet<RegistroHumor> RegistrosHumor => Set<RegistroHumor>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +45,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasKey(s => s.Id);
             e.Property(s => s.Titulo).IsRequired().HasMaxLength(200);
             e.Property(s => s.Concluida).IsRequired();
+        });
+
+        modelBuilder.Entity<RegistroHumor>(e =>
+        {
+            e.ToTable("registros_humor");
+            e.HasKey(h => h.Id);
+            e.Property(h => h.Nivel).IsRequired();
+            e.Property(h => h.Emoji).IsRequired().HasMaxLength(10);
+            e.Property(h => h.Sentimento).HasMaxLength(50);
+            e.Property(h => h.DataRegistro).IsRequired();
         });
     }
 }

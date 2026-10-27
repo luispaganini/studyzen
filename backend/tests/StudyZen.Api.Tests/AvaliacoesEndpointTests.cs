@@ -31,10 +31,12 @@ public class AvaliacoesEndpointTests : IClassFixture<StudyZenApiFactory>
     [Fact]
     public async Task Post_ComDadosValidos_CriaERetornaOrdenadoPorData()
     {
+        // 1. Cria disciplina
         var discResp = await _client.PostAsJsonAsync("/api/disciplinas", new { nome = "Algoritmos", cargaHoraria = 80 });
         var disc = await discResp.Content.ReadFromJsonAsync<DisciplinaResponse>();
         Assert.NotNull(disc);
 
+        // 2. Cria duas avaliações com datas diferentes
         var dataMaisDistante = DateTime.UtcNow.AddDays(15);
         var dataMaisProxima = DateTime.UtcNow.AddDays(3);
 
@@ -54,6 +56,7 @@ public class AvaliacoesEndpointTests : IClassFixture<StudyZenApiFactory>
             Subtarefas: [new SubtarefaDto(null, "Revisar aula 1", false)]
         ));
 
+        // 3. Listar avaliações
         var lista = await _client.GetFromJsonAsync<List<AvaliacaoResponse>>("/api/avaliacoes");
         Assert.NotNull(lista);
         Assert.True(lista.Count >= 2);
@@ -73,4 +76,26 @@ public class AvaliacoesEndpointTests : IClassFixture<StudyZenApiFactory>
         Assert.Contains("Rascunho", response.SubtarefasSugeridas);
         Assert.Contains("Revisão", response.SubtarefasSugeridas);
     }
+
+    [Fact]
+    public async Task Humor_PostEGet_FuncionaComSucesso()
+    {
+        var request = new CreateHumorRequest(
+            Nivel: 4,
+            Emoji: "🙂",
+            Sentimento: "Produtivo"
+        );
+
+        var postResp = await _client.PostAsJsonAsync("/api/humor", request);
+        Assert.Equal(HttpStatusCode.Created, postResp.StatusCode);
+        var criado = await postResp.Content.ReadFromJsonAsync<HumorResponse>();
+        Assert.NotNull(criado);
+        Assert.Equal(4, criado.Nivel);
+        Assert.Equal("🙂", criado.Emoji);
+
+        var lista = await _client.GetFromJsonAsync<List<HumorResponse>>("/api/humor");
+        Assert.NotNull(lista);
+        Assert.Contains(lista, h => h.Id == criado.Id);
+    }
 }
+
