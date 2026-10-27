@@ -8,6 +8,7 @@ import '../helpers/test_doubles.dart';
 void main() {
   late MockDisciplinaService disciplinaService;
   late MockAvaliacaoService avaliacaoService;
+  late MockHumorService humorService;
   late FakeNotificationService notifications;
 
   Future<void> pumpApp(WidgetTester tester) async {
@@ -17,6 +18,7 @@ void main() {
     await tester.pumpWidget(StudyZenApp(
       disciplinaService: disciplinaService,
       avaliacaoService: avaliacaoService,
+      humorService: humorService,
       notificationService: notifications,
       alertPlayer: FakeAlertPlayer(),
     ));
@@ -26,10 +28,12 @@ void main() {
   setUp(() {
     disciplinaService = MockDisciplinaService();
     avaliacaoService = MockAvaliacaoService();
+    humorService = MockHumorService();
     notifications = FakeNotificationService();
 
     when(() => disciplinaService.listar()).thenAnswer((_) async => []);
     when(() => avaliacaoService.listar()).thenAnswer((_) async => []);
+    when(() => humorService.listar()).thenAnswer((_) async => []);
   });
 
   testWidgets('tela de foco mostra 25:00 e inicia/pausa o timer', (tester) async {
@@ -85,6 +89,26 @@ void main() {
     expect(find.text('60h de carga horária'), findsOneWidget);
   });
 
+  testWidgets('US07: Checagem rápida de humor com 1 toque', (tester) async {
+    when(() => humorService.registrar(
+          nivel: any(named: 'nivel'),
+          emoji: any(named: 'emoji'),
+          sentimento: any(named: 'sentimento'),
+        )).thenAnswer((_) async => humor(1, 4, emoji: '🙂', sentimento: 'Produtivo'));
+
+    await pumpApp(tester);
+
+    await tester.tap(find.byKey(const Key('tabPrazos')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Como foi seu foco hoje?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('humorEmoji-4')));
+    await tester.pumpAndSettle();
+
+    verify(() => humorService.registrar(nivel: 4, emoji: '🙂', sentimento: 'Produtivo')).called(1);
+    expect(find.textContaining('registrado com sucesso'), findsOneWidget);
+  });
+
   testWidgets('US02 & US03: Cadastro de avaliação com DatePicker e Decomposição Inteligente', (tester) async {
     when(() => disciplinaService.listar()).thenAnswer((_) async => [disciplina(1, 'Engenharia de Software')]);
     when(() => avaliacaoService.obterDecomposicao('Trabalho de Conclusão'))
@@ -106,23 +130,27 @@ void main() {
     await tester.tap(find.byKey(const Key('novoPrazoButton')));
     await tester.pumpAndSettle();
 
+    // Testa Decomposição Inteligente (US03)
     await tester.tap(find.byKey(const Key('decomporButton')));
     await tester.pumpAndSettle();
     expect(find.text('Pesquisa'), findsOneWidget);
     expect(find.text('Rascunho'), findsOneWidget);
     expect(find.text('Revisão'), findsOneWidget);
 
+    // Preenche título e seleciona disciplina
     await tester.enterText(find.byKey(const Key('tituloField')), 'TCC Final');
     await tester.tap(find.byKey(const Key('disciplinaDropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Engenharia de Software').last);
     await tester.pumpAndSettle();
 
+    // Seleciona data com DatePicker (US02)
     await tester.tap(find.byKey(const Key('dataPickerButton')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
+    // Salva o prazo
     await tester.tap(find.byKey(const Key('salvarAvaliacaoButton')));
     await tester.pumpAndSettle();
 

@@ -4,15 +4,18 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'services/avaliacao_service.dart';
 import 'services/disciplina_service.dart';
+import 'services/humor_service.dart';
 import 'services/notification_service.dart';
 import 'viewmodels/avaliacoes_viewmodel.dart';
 import 'viewmodels/disciplinas_viewmodel.dart';
+import 'viewmodels/humor_viewmodel.dart';
 import 'viewmodels/pomodoro_viewmodel.dart';
 import 'views/shell/home_shell.dart';
 
 class StudyZenApp extends StatelessWidget {
   final DisciplinaService disciplinaService;
   final AvaliacaoService avaliacaoService;
+  final HumorService humorService;
   final NotificationService notificationService;
   final AlertPlayer alertPlayer;
 
@@ -20,6 +23,7 @@ class StudyZenApp extends StatelessWidget {
     super.key,
     required this.disciplinaService,
     required this.avaliacaoService,
+    required this.humorService,
     required this.notificationService,
     required this.alertPlayer,
   });
@@ -30,8 +34,10 @@ class StudyZenApp extends StatelessWidget {
       providers: [
         Provider<DisciplinaService>.value(value: disciplinaService),
         Provider<AvaliacaoService>.value(value: avaliacaoService),
+        Provider<HumorService>.value(value: humorService),
         ChangeNotifierProvider(create: (_) => DisciplinasViewModel(disciplinaService)..carregar()),
         ChangeNotifierProvider(create: (_) => AvaliacoesViewModel(avaliacaoService)..carregar()),
+        ChangeNotifierProvider(create: (_) => HumorViewModel(humorService)..carregar()),
         ChangeNotifierProvider(
           create: (_) => PomodoroViewModel(notifications: notificationService, alert: alertPlayer),
         ),
