@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../viewmodels/pomodoro_viewmodel.dart';
+import '../avaliacoes/prazos_screen.dart';
 import '../disciplinas/disciplinas_screen.dart';
 import '../pomodoro/pomodoro_screen.dart';
 
@@ -38,7 +39,11 @@ class _HomeShellState extends State<HomeShell> {
       child: Scaffold(
         body: IndexedStack(
           index: _index,
-          children: const [PomodoroScreen(), DisciplinasScreen()],
+          children: const [
+            PomodoroScreen(),
+            DisciplinasScreen(),
+            PrazosScreen(),
+          ],
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
@@ -55,6 +60,12 @@ class _HomeShellState extends State<HomeShell> {
               icon: Icon(Icons.menu_book_outlined),
               selectedIcon: Icon(Icons.menu_book_rounded),
               label: 'Disciplinas',
+            ),
+            NavigationDestination(
+              key: Key('tabPrazos'),
+              icon: Icon(Icons.calendar_today_outlined),
+              selectedIcon: Icon(Icons.calendar_month_rounded),
+              label: 'Prazos',
             ),
           ],
         ),

@@ -1,9 +1,12 @@
 import 'package:mocktail/mocktail.dart';
+import 'package:studyzen/models/avaliacao.dart';
 import 'package:studyzen/models/disciplina.dart';
+import 'package:studyzen/services/avaliacao_service.dart';
 import 'package:studyzen/services/disciplina_service.dart';
 import 'package:studyzen/services/notification_service.dart';
 
 class MockDisciplinaService extends Mock implements DisciplinaService {}
+class MockAvaliacaoService extends Mock implements AvaliacaoService {}
 
 class FakeNotificationService implements NotificationService {
   final List<DateTime> scheduled = [];
@@ -46,3 +49,19 @@ class FakeClock {
 
 Disciplina disciplina(int id, String nome, {int carga = 60}) =>
     Disciplina(id: id, nome: nome, cargaHoraria: carga, criadoEm: DateTime.utc(2026, 10, 12));
+
+Avaliacao avaliacao(int id, String titulo, {int discId = 1, String discNome = 'Cálculo I', String tipo = 'Trabalho de Conclusão', DateTime? data}) =>
+    Avaliacao(
+      id: id,
+      disciplinaId: discId,
+      disciplinaNome: discNome,
+      titulo: titulo,
+      tipo: tipo,
+      dataEntrega: data ?? DateTime.utc(2026, 10, 20),
+      criadoEm: DateTime.utc(2026, 10, 12),
+      subtarefas: const [
+        Subtarefa(titulo: 'Pesquisa', concluida: false),
+        Subtarefa(titulo: 'Rascunho', concluida: false),
+        Subtarefa(titulo: 'Revisão', concluida: false),
+      ],
+    );
