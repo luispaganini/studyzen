@@ -84,4 +84,50 @@ void main() {
     expect(find.text('Cálculo I'), findsWidgets);
     expect(find.text('60h de carga horária'), findsOneWidget);
   });
+
+  testWidgets('US02 & US03: Cadastro de avaliação com DatePicker e Decomposição Inteligente', (tester) async {
+    when(() => disciplinaService.listar()).thenAnswer((_) async => [disciplina(1, 'Engenharia de Software')]);
+    when(() => avaliacaoService.obterDecomposicao('Trabalho de Conclusão'))
+        .thenAnswer((_) async => ['Pesquisa', 'Rascunho', 'Revisão']);
+    when(() => avaliacaoService.criar(
+          disciplinaId: any(named: 'disciplinaId'),
+          titulo: any(named: 'titulo'),
+          tipo: any(named: 'tipo'),
+          dataEntrega: any(named: 'dataEntrega'),
+          subtarefas: any(named: 'subtarefas'),
+        )).thenAnswer((_) async => avaliacao(1, 'TCC Final', discNome: 'Engenharia de Software'));
+
+    await pumpApp(tester);
+
+    await tester.tap(find.byKey(const Key('tabPrazos')));
+    await tester.pumpAndSettle();
+    expect(find.text('Nenhum prazo pendente'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('novoPrazoButton')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('decomporButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('Pesquisa'), findsOneWidget);
+    expect(find.text('Rascunho'), findsOneWidget);
+    expect(find.text('Revisão'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('tituloField')), 'TCC Final');
+    await tester.tap(find.byKey(const Key('disciplinaDropdown')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Engenharia de Software').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('dataPickerButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('salvarAvaliacaoButton')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('TCC Final'), findsOneWidget);
+    expect(find.text('Engenharia de Software'), findsOneWidget);
+    expect(find.text('Etapas decompostas:'), findsOneWidget);
+  });
 }
